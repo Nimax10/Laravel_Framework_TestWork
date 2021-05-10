@@ -49,8 +49,8 @@ class ProductController extends Controller
     	$validator = Validator::make($req->all(), [
     		'login' => 'required',
     		'product' => 'required',
-    		'сhange_on' => 'required|unique:products,price',
-    		'change_to' => 'required',
+    		'сhange_on' => 'required|unique:products,price', //Изменить на "что"
+    		'change_to' => 'required', //Изменить в "чём-то"
     	]);
     	if ($validator->fails()) {
     		return response()->json([
