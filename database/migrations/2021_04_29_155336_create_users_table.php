@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->string('api_token')->nullable();
             $table->string('recovery_key');
+            $table->timestamps();
         });
     }
 
