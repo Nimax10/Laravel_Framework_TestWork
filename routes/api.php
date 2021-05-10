@@ -20,6 +20,9 @@ Route::post('/signup', 'UserController@SignUp');
 Route::post('/signin', 'UserController@SignIn');
 Route::post('/recovery', 'UserController@Password_Recovery');
 Route::post('/logout','UserController@Logout');
+Route::post('/createProduct', 'ProductController@Create_Product');
+Route::post('/editProduct', 'ProductController@Edit_Product');
+Route::post('/deleteProduct', 'ProductController@Delete_Product');
 Route::get('/token', function () {
         return csrf_token(); 
     });
