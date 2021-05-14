@@ -35,22 +35,21 @@ class UserController extends Controller
     				"errors" => $validator->errors(),
     			]
     		], 422);
-    	} else {
-	    	$user = new User();
-	    	$user->first_name = $req->input('first_name');
-	    	$user->last_name = $req->input('last_name');
-	    	$user->email = $req->input('email');
-	    	$user->login = $req->input('login');
-	    	$user->password = $req->input('password');
-	    	$user->api_token = null;
-	    	$user->recovery_key = rand(100000, 999999);
+    	}  
 
-	    	$user->save();
-	    	return response()->json([
-	    		'message' => "Registration is successful!",
-	    		"recovery_key" => "New code: ".$user->recovery_key
-	    	]);
-    	}
+    	$user = new User();
+    	$user->first_name = $req->input('first_name');
+    	$user->last_name = $req->input('last_name');
+    	$user->email = $req->input('email');
+    	$user->login = $req->input('login');
+    	$user->password = $req->input('password');
+    	$user->recovery_key = rand(100000, 999999);
+
+    	$user->save();
+    	return response()->json([
+    		'message' => "Registration is successful!",
+    		"recovery_key" => "New code: ".$user->recovery_key
+    	]);
     }
 
     public function SignIn(Request $req) {
@@ -66,25 +65,22 @@ class UserController extends Controller
     				"errors" => $validator->errors(),
     			]
     		], 422);
-    	} else {
-    		$user = User::where("login", $req->login)->first();
-    		if ($user) {
-    			if ($req->password == $user->password) {
-    				$user->api_token = Str::random(50);
-    				$user->save();
-    				return response()->json(
-    					[
-    						"api_token" => $user->api_token,
-    						"message" => "You are logged in!"
-    					]
-    				);
-    			} else {
-    				return response()->json("The entered data is incorrect!");
-    			}
-    		} else {
-    			return response()->json("This user does not exist!");
-    		}
-    	}
+    	}  
+		$user = User::where("login", $req->login)->first();
+		
+        if (!$user) 
+            return response()->json("This user does not exist!");
+		if ($req->password == $user->password)
+            return response()->json("The entered data is incorrect!");
+
+		$user->api_token = Str::random(50);
+		$user->save();
+		return response()->json(
+			[
+				"api_token" => $user->api_token,
+				"message" => "You are logged in!"
+			]
+		);
     }
 
     public function Password_Recovery(Request $req) {
@@ -102,10 +98,9 @@ class UserController extends Controller
     			]
     		], 422);
     	} else {
-    		$user = User::where("login", $req->login_or_email)->first();
-    		if (!$user) {
-    			$user = User::where("email", $req->login_or_email)->first();
-    		} 
+    		$user = User::where("login", $req->login_or_email)->orWhere("email", $req->login_or_email)->first();
+    		// if (!$user)
+    		// 	$user = User::where("email", $req->login_or_email)->first();
     		if ($user) {
     			if ($req->recovery_key == $user->recovery_key) {
     				$user->recovery_key = rand(100000, 999999);
@@ -127,7 +122,15 @@ class UserController extends Controller
     	}
     }
 
-    public function Logout(Request $req) {
+    public function Logout_alt(Request $req) 
+    {
+        if($token = $req->header("api_token")) //Вызывать в постмане в хидере
+            $user = User::where("api_token", $req->header("api_token"))->delete;
+        return response()->json("Lol", 204);
+    }
+
+    public function Logout(Request $req) 
+    {
     	$validator = Validator::make($req->all(), [
     		'logout' => 'required',
     		'login' => 'required|min:4|max:16',
