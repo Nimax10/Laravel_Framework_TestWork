@@ -20,6 +20,7 @@ class User extends Model
     	"password",
     	"api_token",
     	"recovery_key",
+        "rank",
     ];
 
 }
